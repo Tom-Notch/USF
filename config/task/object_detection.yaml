@@ -1,0 +1,148 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Object Detection Task (PANDORA Dataset)
+# ──────────────────────────────────────────────────────────────────────
+# CenterNet-style detector that predicts heatmaps + regression maps
+# for Rectangular Bounding Fields of View (RBFoV).
+# Supports both Spherical and Planar backbones via architecture default.
+# ──────────────────────────────────────────────────────────────────────
+
+root_directory: ${oc.env:USF_PROJECT_DIRECTORY}/config/task/object_detection
+
+defaults:
+    - object_detection@architecture: spherical  # architecture variant: spherical | planar
+    - strategy: DDP                             # distributed training strategy: DDP | DeepSpeed | FSDP
+    - _self_
+
+# checkpoint: ${oc.env:USF_PROJECT_DIRECTORY}/data/object_detection/checkpoint/spherical-nrr-200.ckpt # uncomment to resume
+
+# ── Lightning Model ──────────────────────────────────────────────────
+model:
+    _target_: usf.network.model.object_detection.ObjectDetectionLightningModel
+
+    optimizer_param:
+        lr: 0.001            # AdamW learning rate
+        weight_decay: 0.01   # AdamW weight decay
+
+    lr_scheduler_param:
+        warmup_steps_rate: 0.4  # fraction of total steps spent in linear warmup
+        min_lr_rate: 0.01       # minimum LR as a ratio of initial LR
+        num_cycles: 0.5         # cosine annealing half-cycles (0.5 = single decay to min)
+
+    benchmark_train: false   # compute mAP every training step (slow, for debugging)
+    benchmark_eval: false    # compute mAP + visualize predictions every validation step
+
+    num_regression_points: 3 # number of nearest grid points to activate for each GT centroid in the regression target maps
+
+    # ── Post-Processing: Extract Raw Detections ──────────────────────
+    extract_raw_rbfovs:
+        probability_threshold: 0.3  # minimum confidence in [0, 1) for a heatmap peak to become a detection
+        pool_radius: 0.06705        # geodesic radius for local-max pooling (optional; defaults to 1.5 x avg nn distance)
+
+    # ── Post-Processing: Non-Maximum Suppression ─────────────────────
+    non_maximum_suppression:
+        max_rbfov_per_category: 20   # keep at most this many detections per class
+        sigma: 5.0                   # Gaussian decay strength for Matrix NMS
+        score_threshold: 0.3         # discard proposals below this updated confidence
+        reduction: prod              # row-wise IoU reduction: "prod" (stronger crowd-breaking) | "min" (SOLOv2-like)
+        compensate: false            # SOLOv2-style max-IoU compensation
+        hard_iou_threshold: 0.2      # greedy Hard-NMS backstop IoU cutoff after Matrix NMS
+        epsilon_tie_break: 1e-6      # small perturbation to break exact IoU ties deterministically
+        vector_average_area: 2.7e-5  # average pixel area (sr) on the candidate sphere for pairwise IoU estimation
+
+    # ── Evaluation ───────────────────────────────────────────────────
+    benchmark:
+        iou_threshold: [0.1, 0.5, 0.75]  # mAP evaluated at these IoU thresholds
+
+    num_vis: 8           # samples to visualize each validation epoch
+    log_image_dpi: 100   # DPI for logged figures
+
+    # ── Loss ─────────────────────────────────────────────────────────
+    loss_param:
+        focal_alpha: 2.0   # focal-loss exponent for positive (detected) examples
+        focal_beta: 4.0    # focal-loss exponent for negative (background) examples
+        lambda_size: 1.0   # weight for RBFoV size regression loss
+        lambda_offset: 1.0 # weight for centroid offset regression loss
+        lambda_angle: 1.0  # weight for rotation angle regression loss
+        allow_periodic_rotation: false  # if true, does not penalize predicted angle = GT + k x pi
+
+    architecture: ${task.architecture}
+
+# ── Data Module ──────────────────────────────────────────────────────
+data_module:
+    _target_: usf.dataset.pandora.PandoraDataModule
+    dataset_base_path: ${oc.env:USF_PROJECT_DIRECTORY}/data/PANDORA
+    # augmentation probabilities in [0.0, 1.0]
+    train_augmentation:
+        chroma_jitter: 0.5           # random hue/saturation shift
+        luma_jitter: 0.5             # random brightness/contrast shift
+        gaussian_blur: 0.5           # Gaussian blur augmentation
+        gray_scale: 0.05             # convert to grayscale
+        horizontal_reflection: 0.5   # left-right reflection on the sphere
+        vertical_reflection: 0.0     # top-bottom reflection
+        erase: 0.0                   # random erasing
+        rotation: 0.0                # random SO(3) rotation
+    val_augmentation:
+        chroma_jitter: 0.0
+        luma_jitter: 0.0
+        gaussian_blur: 0.0
+        gray_scale: 0.0
+        horizontal_reflection: 0.5
+        vertical_reflection: 0.0     # 2 flip + rotation <=> no flip + rotation
+        erase: 0.0
+        rotation: 0.0
+    # Uncomment to reproject onto a pinhole/fisheye output grid:
+    # train_output_vector:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560.npy
+    #     allow_pickle: true
+    # train_output_vector_mask:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560_mask.npy
+    #     allow_pickle: true
+    # val_output_vector:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560.npy
+    #     allow_pickle: true
+    # val_output_vector_mask:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560_mask.npy
+    #     allow_pickle: true
+    val_seed: Object Detection  # deterministic seed for validation ordering
+    downsample_image_size: [960, 480]  # equirectangular output [width, height]; changing this affects model input resolution
+    meta:
+        input:
+            mean: [0.52076054, 0.46685297, 0.41337782]  # per-channel mean on [0, 1] scale (computed offline)
+            std: [0.23466274, 0.23835337, 0.25246194]    # per-channel std  on [0, 1] scale
+            range: [0.0, 255.0]                          # raw pixel value range before normalization
+    num_workers: 2
+    batch_size: 8
+
+# ── Trainer ──────────────────────────────────────────────────────────
+trainer:
+    _target_: pytorch_lightning.Trainer
+    accelerator: gpu
+    enable_model_summary: true
+    precision: 32-true
+    devices: -1
+    max_epochs: 200
+    log_every_n_steps: 10
+    num_sanity_val_steps: 0
+    use_distributed_sampler: false
+    profiler: simple
+
+    strategy: ${task.strategy}
+
+    callbacks:
+        - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+          logging_interval: epoch
+
+    logger:
+        - _target_: pytorch_lightning.loggers.WandbLogger
+          entity: ${oc.env:WANDB_ENTITY,null}
+          project: Object Detection
+          name: ${task.architecture.model_type}
+        # - _target_: pytorch_lightning.loggers.TensorBoardLogger
+        #   name: ${task.architecture.model_type} Object Detection
+        #   save_dir: ${oc.env:USF_PROJECT_DIRECTORY}/tensorboard_logs

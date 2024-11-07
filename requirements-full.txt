@@ -1,0 +1,7 @@
+hnswlib
+jupyter
+# manim: PyPI sdist needs host Cairo/Pango dev packages (and a working C toolchain). Install separately when those exist: uv pip install manim
+pre-commit
+pytest
+pytorch-memlab
+torchviz

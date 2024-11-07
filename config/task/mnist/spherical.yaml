@@ -1,0 +1,57 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Spherical MNIST Architecture
+# ──────────────────────────────────────────────────────────────────────
+# Two-layer spherical CNN: 2 x (SphericalConv + ReLU + Pool) -> FC -> 10.
+# Input images are first resampled from their original grid onto an
+# icosahedral grid via RBF interpolation (see resampler_config).
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: usf.network.model.mnist.SphericalMnist
+model_type: Spherical
+
+# ── Spherical Layer Settings ─────────────────────────────────────────
+location_sampler: icosahedron  # tessellation for output pixel locations; also determines FC input size
+backend: spherical             # spherical convolution backend: circle | ripple | spherical | wave
+
+# Weighting function that maps geodesic distance -> per-edge conv weight.
+# Each branch (distance, direction) gets its own MLP or discrete lookup.
+weighting_function_config:
+    distance:
+        # function: discrete   # discrete lookup table
+        # num_slices: 3        # number of distance bins
+        function: continuous    # learned continuous MLP
+        hidden_dims: [16, 16]  # MLP hidden layer sizes
+        activation: ReLU       # MLP activation
+        embedding:             # input embedding before the MLP
+            type: cosine       # cosine positional encoding
+            L: 8               # number of frequency bands
+    # direction:               # uncomment to enable direction-aware kernels
+    #     function: continuous
+    #     hidden_dims: [16, 16]
+    #     activation: ReLU
+    #     embedding:
+    #         type: fourier
+    #         L: 8
+    #         include_x: false
+
+resolution_factor: 0.5        # output pixels ~ input pixels x resolution_factor per layer
+reject_oo_fov_vector: false   # true = mask out-of-FoV vectors (set false for panoramic input)
+
+# ── Input Resampler ──────────────────────────────────────────────────
+# Reprojects the raw input image onto a regular spherical grid before
+# feeding it into the network.  Disable by removing this block.
+resampler_config:
+    location_sampler: icosahedron           # determines the resampled output grid
+    value_sampler: radial_basis_function    # interpolation method: nearest_neighbor | radial_basis_function
+    value_sampler_config:
+        radius: 0.1000586450099945          # geodesic search radius for RBF neighbours
+        # num_in_circle_points: 4           # alternative: fixed neighbour count
+        kernel: gaussian                    # RBF kernel: gaussian | multiquadric | inverse_multiquadric | linear
+        sigma: 0.2                          # RBF kernel bandwidth
+        block_size: 16384                   # chunk size for pairwise distance computation (VRAM tradeoff)
+    reject_oo_fov_value: false              # mask out-of-FoV interpolated values (false for panoramic input)
+    output_average_pixel_area: 0.004345218185335398  # fixes output grid density across runs (sr per pixel)
+
+block_size: 16384  # chunk size for collection-matrix construction in spherical layers; increase for speed at the cost of VRAM

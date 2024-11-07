@@ -1,0 +1,71 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# DeepSpeed Strategy (ZeRO Stage 3 + CPU Offload)
+# ──────────────────────────────────────────────────────────────────────
+# Shards model parameters, gradients, and optimizer states across GPUs
+# (ZeRO-3) and optionally offloads them to CPU/NVMe.  Enables training
+# models that exceed single-GPU VRAM.
+#
+# Reference: https://www.deepspeed.ai/docs/config-json
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: pytorch_lightning.strategies.DeepSpeedStrategy
+
+config: ${oc.env:USF_PROJECT_DIRECTORY}/config/task/strategy/deepspeed.json  # optional external JSON config; overrides all defaults below
+
+# These are set to null so Lightning resolves them automatically.
+accelerator:
+parallel_devices:
+cluster_environment:
+
+# ── ZeRO Optimization ───────────────────────────────────────────────
+zero_optimization: true
+stage: 3                   # ZeRO stage: 0=disabled, 1=optimizer, 2=optimizer+gradient, 3=optimizer+gradient+parameter partitioning
+pin_memory: false          # pin optimizer state in CPU memory for faster transfer (extra host RAM)
+sub_group_size: 1000000000000  # number of parameters per offload sub-group; smaller = less peak RAM but more communication
+partition_activations: false   # partition activations across GPUs (requires wrapping forward in deepspeed.checkpointing.checkpoint)
+load_full_weights: false   # load a single (non-sharded) state_dict checkpoint into ZeRO-3
+remote_device: gpu         # device to instantiate model on initially: gpu | cpu | nvme
+
+# ── CPU / NVMe Offloading ───────────────────────────────────────────
+offload_optimizer: true            # offload optimizer states to CPU/NVMe
+offload_parameters: true           # offload parameters to CPU/NVMe (ZeRO-3 only)
+offload_params_device: cpu         # offload destination for parameters: cpu | nvme
+offload_optimizer_device: cpu      # offload destination for optimizer states: cpu | nvme
+
+# NVMe offloading buffers (only used when offload device = nvme)
+params_buffer_count: 5             # number of parameter buffers in the NVMe pool
+params_buffer_size: 100000000      # size of each buffer (bytes)
+max_in_cpu: 1000000000             # max parameter elements kept in CPU when NVMe offloading is active
+# nvme_path: /local_nvme           # filesystem path for NVMe offloading
+optimizer_buffer_count: 4          # optimizer buffer count (>= optimizer states per param, e.g. Adam has 4)
+block_size: 1048576                # I/O block size in bytes for NVMe
+queue_depth: 8                     # I/O queue depth for NVMe
+single_submit: false               # submit I/O as individual requests vs. one block
+overlap_events: true               # overlap I/O requests without waiting for completion
+thread_count: 1                    # intra-request parallelism for NVMe read/write
+
+# ── Communication ────────────────────────────────────────────────────
+contiguous_gradients: true         # copy gradients to contiguous buffer to avoid fragmentation
+overlap_comm: true                 # overlap gradient reduction with backward computation
+allgather_partitions: true         # use AllGather (vs. broadcast) for parameter collection
+reduce_scatter: true               # use ReduceScatter (vs. AllReduce) for gradient averaging
+allgather_bucket_size: 200000000   # AllGather bucket size (elements); smaller = less memory, more comms
+reduce_bucket_size: 200000000      # Reduce bucket size (elements)
+zero_allow_untested_optimizer: true  # allow non-Adam optimizers with ZeRO
+
+# ── Logging & Loss Scaling ───────────────────────────────────────────
+logging_batch_size_per_gpu: auto   # per-GPU batch size for throughput logging; "auto" infers from DataLoader
+logging_level: 30                  # Python logging level (30 = WARNING)
+loss_scale: 0.0                    # FP16 loss scale; 0.0 = dynamic loss scaling
+initial_scale_power: 16            # initial dynamic loss scale = 2^initial_scale_power
+loss_scale_window: 1000            # steps between loss scale adjustments
+hysteresis: 16                     # delay (steps) before reducing loss scale after overflow
+min_loss_scale: 1                  # minimum dynamic loss scale value
+
+# ── Activation Checkpointing ────────────────────────────────────────
+cpu_checkpointing: false               # offload checkpointed activations to CPU
+contiguous_memory_optimization: false  # make partitioned activations contiguous in memory
+synchronize_checkpoint_boundary: false # insert cuda.synchronize() at checkpoint boundaries
+exclude_frozen_parameters: false       # exclude frozen params from checkpoints

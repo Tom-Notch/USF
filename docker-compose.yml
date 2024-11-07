@@ -1,0 +1,58 @@
+services:
+    usf:
+        build:
+            dockerfile: ./docker/${IMAGE_TAG}/Dockerfile
+            args:
+                BASE_IMAGE: ${BASE_IMAGE}
+                IMAGE_USER: ${IMAGE_USER}
+                HOME_FOLDER: ${HOME_FOLDER}
+                CODE_FOLDER: ${CODE_FOLDER}
+                TIME_ZONE: ${TIME_ZONE}
+            x-bake:
+                contexts:
+                    home-folder-config: ./docker/build-context/home-folder-config
+                platforms:
+                    - linux/amd64 # for PC
+                    # - linux/arm64 # for arm64 platforms
+            privileged: true
+            tags:
+                - ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+        image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+        pull_policy: missing
+        runtime: nvidia
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [gpu]
+        container_name: ${CONTAINER_NAME}
+        privileged: true
+        user: root
+        hostname: ${HOST}
+        network_mode: host
+        ipc: host
+        pid: host
+        ulimits:
+            core: -1
+        group_add:
+            - video
+            - audio
+        env_file: .env
+        environment: # -e (overrides / extras not in .env)
+            DISPLAY: ${DISPLAY}
+            QT_X11_NO_MITSHM: 1
+            XAUTHORITY: ${XAUTH}
+        volumes: # -v
+            - /var/lib/systemd/coredump/:/cores
+            - /tmp/.X11-unix/:/tmp/.X11-unix/:rw
+            - ${XAUTH}:${XAUTH}
+            - .:${HOME_FOLDER}/${CODE_FOLDER}
+            - ${MNIST_DIR}:${HOME_FOLDER}/${CODE_FOLDER}/data/MNIST
+            - ${PANDORA_DIR}:${HOME_FOLDER}/${CODE_FOLDER}/data/PANDORA
+            - ${STANFORD2D3DS_DIR}:${HOME_FOLDER}/${CODE_FOLDER}/data/stanford2D3DS
+        working_dir: ${HOME_FOLDER}/${CODE_FOLDER}
+        stdin_open: true # for -it
+        tty: true # for -it
+        # command: /bin/zsh

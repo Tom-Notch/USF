@@ -1,0 +1,9 @@
+%YAML 1.2
+---
+sensor_configs:
+    thermal_left: ./sensors/thermal_left.yaml
+    thermal_right: ./sensors/thermal_right.yaml
+    rgb_0: ./sensors/rgb_0.yaml
+    rgb_1: ./sensors/rgb_1.yaml
+    rgb_2: ./sensors/rgb_2.yaml
+    rgb_3: ./sensors/rgb_3.yaml

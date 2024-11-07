@@ -1,0 +1,8 @@
+services:
+    usf:
+        image: tomnotch/usf:latest
+        entrypoint: /bin/zsh
+        user: root
+        volumes:
+            - ..:/home/ubuntu/usf
+        working_dir: /home/ubuntu/usf

@@ -1,0 +1,11 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Planar MNIST Architecture (Baseline)
+# ──────────────────────────────────────────────────────────────────────
+# Standard 2D CNN: 2 x (Conv2d + ReLU + MaxPool) -> FC -> 10.
+# Operates in Euclidean image space — no spherical resampling.
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: usf.network.model.mnist.PlanarMnist
+model_type: Planar

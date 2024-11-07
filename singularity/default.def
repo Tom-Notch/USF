@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: {{DOCKER_USER}}/{{IMAGE_NAME}}:{{IMAGE_TAG}}
+
+%labels
+    Maintainer  Mukai (Tom Notch) Yu
+    Image       {{IMAGE_NAME}}:{{IMAGE_TAG}}
+    Source      docker://{{DOCKER_USER}}/{{IMAGE_NAME}}:{{IMAGE_TAG}}
+
+%environment
+    # ---- Runtime env (applies inside the instance at start/exec) ----
+    export HOME={{HOME_FOLDER}}
+
+%runscript
+    # works only when you execute 'singularity run ...'
+    # Source zshrc if it exists
+    [ -f ~/.zshrc ] && source ~/.zshrc
+
+    cd "{{HOME_FOLDER}}/{{CODE_FOLDER}}" 2>/dev/null || cd "{{HOME_FOLDER}}" || true
+    exec "$@"

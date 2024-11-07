@@ -1,0 +1,37 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# FSDP (Fully Sharded Data Parallel) Strategy
+# ──────────────────────────────────────────────────────────────────────
+# Shards model parameters, gradients, and optimizer states across GPUs
+# using PyTorch-native FSDP.  Uses size-based auto wrapping to shard
+# modules with >= 10M parameters.
+#
+# Reference: https://pytorch.org/docs/stable/fsdp.html
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: pytorch_lightning.strategies.FSDPStrategy
+
+# These are set to null so Lightning resolves them automatically.
+accelerator:
+parallel_devices:
+cluster_environment:
+
+# ── Sharding ─────────────────────────────────────────────────────────
+sharding_strategy: FULL_SHARD  # FULL_SHARD | SHARD_GRAD_OP | NO_SHARD | HYBRID_SHARD
+
+# ── Checkpoint Format ────────────────────────────────────────────────
+state_dict_type: full  # "full": assemble on rank 0, save single file; "sharded": each rank saves its own shard
+
+# ── Auto Wrap Policy ────────────────────────────────────────────────
+# Determines how sub-modules are grouped into FSDP units.
+auto_wrap_policy:
+    _target_: torch.distributed.fsdp.wrap.size_based_auto_wrap_policy
+    _partial_: true
+    min_num_params: 10000000   # minimum parameter count (~10M) to wrap a module as its own FSDP unit
+
+# ── Memory & Communication ───────────────────────────────────────────
+cpu_offload: false             # offload parameters/gradients to CPU (saves GPU RAM at cost of speed)
+use_orig_params: true          # use module's original parameter objects (needed for torch.compile and mixed precision)
+sync_module_states: true       # broadcast rank-0 parameters to all ranks at init (ensures consistent initialization)
+limit_all_gathers: true        # rate-limit AllGather prefetching to bound GPU memory to ~2 FSDP units at a time

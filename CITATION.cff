@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+title: "Unified Spherical Frontend"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: Mukai
+    family-names: Yu
+    affiliation: "Carnegie Mellon University"
+    orcid: "https://orcid.org/0000-0002-3838-4172"
+  - given-names: Mosam
+    family-names: Dabhi
+    affiliation: "Carnegie Mellon University"
+    orcid: "https://orcid.org/0000-0001-5822-3838"
+  - given-names: Liuyue
+    family-names: Xie
+    affiliation: "Carnegie Mellon University"
+    orcid: "https://orcid.org/0000-0001-7125-5084"
+  - given-names: Sebastian
+    family-names: Scherer
+    affiliation: "Carnegie Mellon University"
+    orcid: "https://orcid.org/0000-0002-8373-4688"
+  - given-names: "László A."
+    family-names: Jeni
+    affiliation: "Carnegie Mellon University"
+    orcid: "https://orcid.org/0000-0002-2830-700X"
+repository-code: "https://github.com/Tom-Notch/USF"
+url: "https://tomnotch.com/USF"
+license: BSD-3-Clause
+preferred-citation:
+  type: conference-paper
+  title: "Unified Spherical Frontend: Learning Rotation-Equivariant Representations of Spherical Images from Any Camera"
+  authors:
+    - given-names: Mukai
+      family-names: Yu
+      affiliation: "Carnegie Mellon University"
+      orcid: "https://orcid.org/0000-0002-3838-4172"
+    - given-names: Mosam
+      family-names: Dabhi
+      affiliation: "Carnegie Mellon University"
+      orcid: "https://orcid.org/0000-0001-5822-3838"
+    - given-names: Liuyue
+      family-names: Xie
+      affiliation: "Carnegie Mellon University"
+      orcid: "https://orcid.org/0000-0001-7125-5084"
+    - given-names: Sebastian
+      family-names: Scherer
+      affiliation: "Carnegie Mellon University"
+      orcid: "https://orcid.org/0000-0002-8373-4688"
+    - given-names: "László A."
+      family-names: Jeni
+      affiliation: "Carnegie Mellon University"
+      orcid: "https://orcid.org/0000-0002-2830-700X"
+  collection-title: "IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)"
+  year: 2026
+  month: 6
+  publisher:
+    name: IEEE

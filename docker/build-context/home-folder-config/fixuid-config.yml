@@ -1,0 +1,8 @@
+---
+user: camera-driver
+group: camera-driver
+paths:
+    - /home/camera-driver/.oh-my-zsh
+    - /home/camera-driver/.zshrc
+    - /home/camera-driver/.bashrc
+    - /tmp

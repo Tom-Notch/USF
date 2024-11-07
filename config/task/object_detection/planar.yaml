@@ -1,0 +1,23 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Planar Object Detection Architecture (Baseline)
+# ──────────────────────────────────────────────────────────────────────
+# Standard 2D YOLOv11-style backbone operating in Euclidean image space.
+# CenterNet-style heatmaps + regression maps for RBFoV detection.
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: usf.network.model.object_detection.PlanarObjectDetection
+model_type: Planar             # experiment display name
+
+# ── Network Architecture ─────────────────────────────────────────────
+num_categories: 47             # number of PANDORA object categories
+in_channels: 3                 # input channels (RGB = 3)
+base_channel: 64               # channel basis; deeper layers scale as base_channel x 2^k
+activation: ReLU               # activation function for all layers
+expansion: 0.5                 # bottleneck expansion ratio
+kernel_size: 3                 # Conv2d kernel size (must be odd)
+
+# ── Attention (PSA) Settings ─────────────────────────────────────────
+num_psa: 2                             # number of PSA attention blocks inside C2PSA at the deep neck
+attention_backend: xformers            # attention implementation: xformers | flex attention | plain

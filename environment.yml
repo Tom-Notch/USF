@@ -1,0 +1,29 @@
+%YAML 1.2
+---
+# Conda provides dependencies that are not available (or not practical) via PyPI/uv:
+#   - Python 3.12
+#   - uv (fast pip replacement)
+#   - faiss-gpu (CUDA build; conda-only)
+#   - libmagic (C library for python-magic)
+#   - libnvjitlink (CUDA JIT linking)
+#
+# Do not list PyPI-distributed Python libraries here. Install those with uv after activation:
+#   conda activate usf
+#   uv pip install -e .
+#   uv pip install -e '.[full]'
+
+name: usf
+
+channels:
+    - pytorch
+    - nvidia
+    - rapidsai
+    - conda-forge
+
+dependencies:
+    - python=3.12
+    - pip>=23
+    - uv
+    - faiss-gpu
+    - libmagic
+    - libnvjitlink

@@ -1,0 +1,14 @@
+{
+  "train_micro_batch_size_per_gpu": 4,
+  "pipeline": {
+    "enabled": true,
+    "pipeline_parallel_size": 2,
+    "schedule": "1F1B"
+  },
+  "zero_optimization": {
+    "stage": 3,
+    "overlap_comm": true,
+    "reduce_scatter": true,
+    "contiguous_gradients": true
+  }
+}

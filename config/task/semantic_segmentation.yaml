@@ -1,0 +1,127 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Semantic Segmentation Task (Stanford 2D-3D-S Dataset)
+# ──────────────────────────────────────────────────────────────────────
+# Per-pixel classification into 14 semantic classes.
+# Trained with cross-entropy + Dice loss; evaluated with mIoU / mAcc.
+# Supports both Spherical and Planar backbones via architecture default.
+# ──────────────────────────────────────────────────────────────────────
+
+root_directory: ${oc.env:USF_PROJECT_DIRECTORY}/config/task/semantic_segmentation
+
+defaults:
+    - semantic_segmentation@architecture: spherical  # architecture variant: spherical | planar
+    - strategy: DDP                                  # distributed training strategy: DDP | DeepSpeed | FSDP
+    - _self_
+
+# checkpoint: ${oc.env:USF_PROJECT_DIRECTORY}/data/semantic_segmentation/checkpoint/spherical-nrr-200.ckpt # uncomment to resume
+
+# ── Lightning Model ──────────────────────────────────────────────────
+model:
+    _target_: usf.network.model.semantic_segmentation.SemanticSegmentationLightningModel
+
+    optimizer_param:
+        lr: 0.001            # AdamW learning rate
+        weight_decay: 0.01   # AdamW weight decay
+
+    lr_scheduler_param:
+        warmup_steps_rate: 0.4  # fraction of total steps spent in linear warmup
+        min_lr_rate: 0.01       # minimum LR as a ratio of initial LR
+        num_cycles: 0.5         # cosine annealing half-cycles
+
+    benchmark_train: true    # compute mIoU/mAcc every training step
+
+    # ── Loss ─────────────────────────────────────────────────────────
+    loss_param:
+        dice_weight: 0.3              # weight of Dice loss in combined loss (CE weight = 1 - dice_weight)
+        label_smoothing: 0.05         # label smoothing factor for cross-entropy
+        include_absent_classes: false  # include classes absent from GT when averaging per-sample Dice
+
+    num_vis: 8           # samples to visualize each validation epoch
+    log_image_dpi: 100   # DPI for logged figures
+
+    architecture: ${task.architecture}
+
+# ── Data Module ──────────────────────────────────────────────────────
+data_module:
+    _target_: usf.dataset.stanford2D3DS.Stanford2D3DSDataModule
+    dataset_base_path: ${oc.env:USF_PROJECT_DIRECTORY}/data/stanford2D3DS
+    # augmentation probabilities in [0.0, 1.0]
+    train_augmentation:
+        chroma_jitter: 0.5
+        luma_jitter: 0.5
+        gaussian_blur: 0.5
+        gray_scale: 0.05
+        horizontal_reflection: 0.5
+        vertical_reflection: 0.0
+        erase: 0.0
+        rotation: 0.0
+    val_augmentation:
+        chroma_jitter: 0.0
+        luma_jitter: 0.0
+        gaussian_blur: 0.0
+        gray_scale: 0.0
+        horizontal_reflection: 0.5
+        vertical_reflection: 0.0     # 2 flip + rotation <=> no flip + rotation
+        erase: 0.0
+        rotation: 0.0
+    # Uncomment to reproject onto a pinhole/fisheye output grid:
+    # train_output_vector:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560.npy
+    #     allow_pickle: true
+    # train_output_vector_mask:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560_mask.npy
+    #     allow_pickle: true
+    # val_output_vector:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560.npy
+    #     allow_pickle: true
+    # val_output_vector_mask:
+    #     _target_: numpy.load
+    #     file: ${oc.env:USF_PROJECT_DIRECTORY}/config/lens_normal_map/180_180_560_560_mask.npy
+    #     allow_pickle: true
+    val_seed: Semantic Segmentation  # deterministic seed for validation ordering
+    downsample_image_size: [960, 480]  # equirectangular output [width, height]; changing this affects model input resolution
+    meta:
+        input:
+            mean: [0.53989742, 0.51861451, 0.45900312]  # per-channel mean on [0, 1] scale (computed offline)
+            std: [0.19439127, 0.19148353, 0.19884944]    # per-channel std  on [0, 1] scale
+            range: [0.0, 255.0]                          # raw pixel value range before normalization
+        label:
+            ignore_index: 0  # class index to ignore during training and evaluation (typically background / unknown)
+            # class weights for cross-entropy loss, computed offline via Stanford2D3DSDataset.compute_class_weights
+            class_weight: [0., 0.84401656, 0.98537693, 0.68518653, 0.61882607, 0.68802938, 0.62075897, 0.82498247, 0.62132053, 0.61883815, 3.86012239, 0.8564899,
+                0.61882153, 1.15104239]
+    num_workers: 3
+    batch_size: 8
+
+# ── Trainer ──────────────────────────────────────────────────────────
+trainer:
+    _target_: pytorch_lightning.Trainer
+    accelerator: gpu
+    enable_model_summary: true
+    precision: 32-true
+    devices: -1
+    max_epochs: 200
+    log_every_n_steps: 10
+    num_sanity_val_steps: 0
+    use_distributed_sampler: false
+    profiler: simple
+
+    strategy: ${task.strategy}
+
+    callbacks:
+        - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+          logging_interval: epoch
+
+    logger:
+        - _target_: pytorch_lightning.loggers.WandbLogger
+          entity: ${oc.env:WANDB_ENTITY,null}
+          project: Semantic Segmentation
+          name: ${task.architecture.model_type}_${task.architecture.backbone}
+        # - _target_: pytorch_lightning.loggers.TensorBoardLogger
+        #   name: ${task.architecture.model_type} ${task.architecture.backbone} Semantic Segmentation
+        #   save_dir: ${oc.env:USF_PROJECT_DIRECTORY}/tensorboard_logs

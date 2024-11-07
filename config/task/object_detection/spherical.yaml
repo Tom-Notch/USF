@@ -1,0 +1,60 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# Spherical Object Detection Architecture
+# ──────────────────────────────────────────────────────────────────────
+# YOLOv11-style backbone operating on spherical signals (S^2).
+# Uses geodesic convolutions via GenericSphericalConv and produces
+# CenterNet-style heatmaps + regression maps for RBFoV detection.
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: usf.network.model.object_detection.SphericalObjectDetection
+model_type: Spherical          # experiment display name
+
+# ── Network Architecture ─────────────────────────────────────────────
+num_categories: 47             # number of PANDORA object categories
+in_channels: 3                 # input channels (RGB = 3)
+base_channel: 64               # channel basis; deeper layers scale as base_channel x 2^k
+activation: ReLU               # activation function for all layers
+expansion: 0.5                 # bottleneck expansion ratio: hidden_channels = in_channels x expansion
+
+# ── Spherical Convolution Settings ───────────────────────────────────
+backend: circle                # spherical conv backend: circle | ripple | spherical | wave
+location_sampler: icosahedron  # tessellation for output pixel locations in all bottom-level spherical layers
+reject_oo_fov_vector: true     # mask out-of-FoV vectors (true for non-panoramic input)
+resolution_factor: 0.25        # output pixels ~ input pixels x resolution_factor per downsample layer
+block_size: 16384              # chunk size for pairwise distance / collection-matrix construction; increase for speed, decrease for VRAM
+
+# Weighting function: maps geodesic quantities -> per-edge convolution weights.
+weighting_function_config:
+    distance:
+        # ── Continuous (MLP-based) ──
+        # function: continuous
+        # activation: ReLU
+        # hidden_dims: [4, 4]
+        # embedding:
+        #     type: cosine
+        #     L: 3
+        # ── Discrete (lookup table) ──
+        function: discrete
+        num_slices: 3          # number of distance bins
+    # direction:               # uncomment for direction-aware kernels
+    #     function: discrete
+    #     num_slices: 3
+
+# ── Input Resampler ──────────────────────────────────────────────────
+# Reprojects the raw equirectangular image onto a regular icosahedral grid.
+resampler_config:
+    location_sampler: icosahedron
+    value_sampler: radial_basis_function
+    value_sampler_config:
+        num_in_circle_points: 4         # fixed-count neighbour search for RBF
+        kernel: gaussian
+        sigma: 0.2
+        block_size: 16384
+    reject_oo_fov_value: true           # mask out-of-FoV interpolated values
+    output_average_pixel_area: 2.727076956241019e-05  # fixes output grid density (sr per pixel)
+
+# ── Attention (PSA) Settings ─────────────────────────────────────────
+num_psa: 2                             # number of PSA attention blocks inside C2PSA at the deep neck
+attention_backend: xformers            # attention implementation: xformers | flex attention | plain

@@ -1,0 +1,30 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# DDP (Distributed Data Parallel) Strategy
+# ──────────────────────────────────────────────────────────────────────
+# Each GPU holds a full model replica.  Gradients are synchronized via
+# AllReduce after each backward pass.  This is the default and simplest
+# multi-GPU strategy.
+# ──────────────────────────────────────────────────────────────────────
+
+_target_: pytorch_lightning.strategies.DDPStrategy
+
+# These are set to null so Lightning resolves them automatically.
+accelerator:
+parallel_devices:
+cluster_environment:
+
+# Uncomment to customize DDP internals:
+# checkpoint_io:
+# precision_plugin:
+# ddp_comm_state:
+# ddp_comm_hook:
+# ddp_comm_wrapper:
+# model_averaging_period:
+# process_group_backend:
+# # timeout: default_pg_timeout
+# start_method: popen
+
+broadcast_buffers: false       # sync module buffers at each forward pass (disable to save communication)
+gradient_as_bucket_view: true  # alias gradients into AllReduce buckets to reduce peak memory by ~gradient_size

@@ -1,0 +1,55 @@
+[project]
+name = "usf"
+version = "0.1.0"
+authors = [{ name = "Mukai (Tom Notch) Yu", email = "mukai.yu@tomnotch.com" }]
+description = "Unified Spherical Frontend for lens-neutral perception."
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: GPU :: NVIDIA CUDA",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dynamic = ["dependencies", "optional-dependencies"]
+
+[project.urls]
+Repository = "https://github.com/Tom-Notch/Unified-Spherical-Frontend.git"
+Issues = "https://github.com/Tom-Notch/Unified-Spherical-Frontend/issues"
+
+[project.scripts]
+train = "usf.train:main"
+evaluate = "usf.evaluate:main"
+generate_lens_normal_map = "usf.generate_lens_normal_map:main"
+visualize_spherical_image = "usf.visualize_spherical_image:main"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.dynamic.optional-dependencies]
+full = {file = ["requirements-full.txt"]}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["usf", "usf.*"]
+
+[tool.uv]
+extra-index-url = [
+    "https://download.pytorch.org/whl/cu128",
+]
+find-links = [
+    "https://data.pyg.org/whl/torch-2.11.0+cu128.html",
+]

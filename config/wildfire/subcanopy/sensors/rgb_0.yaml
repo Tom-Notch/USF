@@ -1,0 +1,32 @@
+%YAML 1.2
+---
+# Sensor Type: 0: IMU; 1: Non-depth Camera; 2: Depth Camera; 3: LiDAR
+sensor_type: 1
+image_width: 612
+image_height: 514
+
+# Sensing Modality: 0: RGB; 1: thermal
+sensing_modality: 0
+
+# Optional mask
+mask: ./masks/rgb_0_mask.png
+
+# Lens Normal Map, use npz for best precision
+lens_normal_map: ./lens_normal_maps/rgb_0_lens_normal_map.npy
+
+# Intrinsic
+intrinsic:
+    # Camera Model Type: 0: Pinhole; 1: Mei (Fisheye)
+    model_type: 1
+    mirror_parameters:
+        xi: 1.799333485792051
+    distortion_parameters: # radial-tangential distortion
+        k1: -0.09540682982295504
+        k2: 0.20030192773457883
+        p1: 0.0005520243635785922
+        p2: 2.169056782838900e-05
+    projection_parameters:
+        gamma1: 409.006054366
+        gamma2: 409.004226377
+        u0: 304.714661182
+        v0: 255.533174059

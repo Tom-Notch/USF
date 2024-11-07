@@ -1,0 +1,8 @@
+%YAML 1.2
+---
+# USF default configuration entry point.
+# Hydra composes this file first, then overlays the selected task config.
+# Override the task on the CLI:  train task=mnist
+defaults:
+    - task: semantic_segmentation
+    - _self_

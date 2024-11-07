@@ -1,0 +1,69 @@
+%YAML 1.2
+---
+# ──────────────────────────────────────────────────────────────────────
+# MNIST Classification Task
+# ──────────────────────────────────────────────────────────────────────
+# Trains a 10-class digit classifier on spherical-projected MNIST.
+# Switch between Spherical and Planar architectures via the defaults
+# list below (mnist@architecture: spherical | planar).
+# ──────────────────────────────────────────────────────────────────────
+
+root_directory: ${oc.env:USF_PROJECT_DIRECTORY}/config/task/mnist
+
+defaults:
+    - mnist@architecture: spherical # architecture variant: spherical | planar
+    - strategy: DDP                 # distributed training strategy: DDP | DeepSpeed | FSDP
+    - _self_
+
+# checkpoint: ${oc.env:USF_PROJECT_DIRECTORY}/data/MNIST/checkpoint/spherical-200.ckpt # uncomment to resume from checkpoint
+
+# ── Lightning Model ──────────────────────────────────────────────────
+model:
+    _target_: usf.network.model.mnist.MNISTLightningModel
+
+    lr: 0.001            # AdamW learning rate
+    weight_decay: 0.01   # AdamW weight decay (L2 regularization)
+
+    visualization_config:
+        num_vis: 16      # number of validation samples to visualize each epoch
+        num_columns: 4   # grid columns in the visualization figure
+    log_image_dpi: 100   # DPI for images logged to the experiment tracker
+
+    architecture: ${task.architecture}  # resolved from defaults above
+
+# ── Data Module ──────────────────────────────────────────────────────
+data_module:
+    _target_: usf.dataset.mnist.MNISTDataModule
+    dataset_base_path: ${oc.env:USF_PROJECT_DIRECTORY}/data/MNIST
+    # augmentation options specify probability in [0.0, 1.0]
+    train_augmentation:
+        rotation: 0.0       # probability of random SO(3) rotation augmentation
+    val_augmentation:
+        rotation: 0.0
+    val_seed: MNIST Classification # deterministic seed for validation set ordering; any string works, keep consistent across runs
+    num_workers: 4
+    batch_size: 1024 # large batch size is not always good, it reduces # forward and step update
+
+# ── Trainer ──────────────────────────────────────────────────────────
+trainer:
+    _target_: pytorch_lightning.Trainer
+    accelerator: gpu
+    enable_model_summary: true
+    precision: 32-true       # full float32 precision
+    devices: -1              # -1 = use all available GPUs
+    max_epochs: 100
+    log_every_n_steps: 10
+    num_sanity_val_steps: 0  # skip sanity validation before training
+    use_distributed_sampler: false  # we handle sampling ourselves
+    profiler: simple
+
+    strategy: ${task.strategy}
+
+    logger:
+        - _target_: pytorch_lightning.loggers.WandbLogger
+          entity: ${oc.env:WANDB_ENTITY,null}
+          project: MNIST Classification
+          name: ${task.architecture.model_type}
+        # - _target_: pytorch_lightning.loggers.TensorBoardLogger
+        #   name: ${task.architecture.model_type} MNIST Classification
+        #   save_dir: ${oc.env:USF_PROJECT_DIRECTORY}/tensorboard_logs
