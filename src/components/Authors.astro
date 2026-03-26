@@ -1,0 +1,47 @@
+---
+import type { Author } from "../types/types";
+
+interface Props {
+  authors: Author[];
+}
+
+const { authors } = Astro.props;
+---
+
+<div
+  class="links not-prose mx-auto flex max-w-[52rem] flex-row flex-wrap justify-center gap-x-6 gap-y-3"
+>
+  {
+    authors.map((author) => (
+      <div class="flex flex-col items-center text-center">
+        <div class="flex flex-row items-start text-xl font-medium text-zinc-900 md:text-2xl dark:text-zinc-100">
+          {author.url ? (
+            <a
+              class="text-inherit no-underline decoration-zinc-900/40 decoration-2 underline-offset-[0.2em] transition-colors hover:underline dark:decoration-zinc-100/40"
+              href={author.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {author.name}
+            </a>
+          ) : (
+            author.name
+          )}
+          {author.notes && (
+            <sup class="ml-0.5 text-sm text-inherit md:text-base">
+              {author.notes.map(
+                (note, index, array) =>
+                  note + (index < array.length - 1 ? "," : ""),
+              )}
+            </sup>
+          )}
+        </div>
+        {author.institution && (
+          <div class="text-base text-zinc-600 md:text-lg dark:text-zinc-400">
+            {author.institution}
+          </div>
+        )}
+      </div>
+    ))
+  }
+</div>

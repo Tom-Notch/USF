@@ -1,0 +1,13 @@
+---
+import { AdaptiveSvg } from "./AdaptiveSvg.tsx";
+
+interface Props {
+  src: string;
+  alt?: string;
+  class?: string;
+}
+
+const { src, alt, class: className } = Astro.props;
+---
+
+<AdaptiveSvg client:load src={src} alt={alt} className={className} />

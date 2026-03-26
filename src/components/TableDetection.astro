@@ -1,0 +1,66 @@
+<div class="not-prose overflow-x-auto">
+  <table class="mx-auto w-auto border-collapse text-sm">
+    <thead>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <th class="px-3 py-2 text-left align-middle font-semibold" rowspan="2"
+          >Model</th
+        >
+        <th class="px-3 py-2 text-center align-middle font-semibold" rowspan="2"
+          >Train</th
+        >
+        <th class="px-3 py-2 text-center font-semibold" colspan="2">Test NR</th>
+        <th class="px-3 py-2 text-center font-semibold" colspan="2">Test RR</th>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <th class="px-3 py-1 text-center text-xs">mAP₁₀↑</th>
+        <th class="px-3 py-1 text-center text-xs">mAP₅₀↑</th>
+        <th class="px-3 py-1 text-center text-xs">mAP₁₀↑</th>
+        <th class="px-3 py-1 text-center text-xs">mAP₅₀↑</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-3 py-1.5">R-CenterNet</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">35.73%</td>
+        <td class="px-3 py-1.5 text-center">22.7%</td>
+        <td class="px-3 py-1.5 text-center text-zinc-400">N/A</td>
+        <td class="px-3 py-1.5 text-center text-zinc-400">N/A</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Planar YOLOv11</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">39.65%</td>
+        <td class="px-3 py-1.5 text-center">24.41%</td>
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >12.71%</td
+        >
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >4.66%</td
+        >
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">27.76%</td>
+        <td class="px-3 py-1.5 text-center">9.99%</td>
+        <td class="px-3 py-1.5 text-center">28.01%</td>
+        <td class="px-3 py-1.5 text-center">10.24%</td>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-3 py-1.5">Spherical YOLOv11</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">29.54%</td>
+        <td class="px-3 py-1.5 text-center">11.41%</td>
+        <td class="px-3 py-1.5 text-center">29.59%</td>
+        <td class="px-3 py-1.5 text-center">7.90%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="h-4"></div>
+<p class="text-center text-base text-zinc-500 dark:text-zinc-400">
+  <strong>Object Detection on PANDORA.</strong> 360° panoramas with oriented bounding
+  boxes (RBFoV). All spherical convolutions use <strong
+    >3-segment discrete PWC</strong
+  > distance weighting.
+</p>

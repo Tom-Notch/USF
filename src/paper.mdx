@@ -1,0 +1,206 @@
+---
+title: "Unified Spherical Frontend: Learning Rotation-Equivariant Representations of Spherical Images from Any Camera"
+authors:
+  - name: Mukai (Tom Notch) Yu
+    url: https://tomnotch.com
+    # institution: Carnegie Mellon University
+    notes: [1]
+  - name: Mosam Dabhi
+    url: https://mosamdabhi.github.io
+    # institution: Carnegie Mellon University
+    notes: [1]
+  - name: Liuyue (Louise) Xie
+    url: https://scholar.google.com/citations?user=OMo-GKoAAAAJ
+    # institution: Carnegie Mellon University
+    notes: [1, 2]
+  - name: Sebastian Scherer
+    url: https://theairlab.org/team/sebastian
+    # institution: Carnegie Mellon University
+    notes: [1, 3]
+  - name: László A. Jeni
+    url: https://www.laszlojeni.com/
+    # institution: Carnegie Mellon University
+    notes: [1]
+notes:
+  - symbol: 1
+    text: Carnegie Mellon University
+    # url: https://www.ri.cmu.edu/
+  - symbol: 2
+    text: Amazon
+    # url: https://labs.amazon.science/
+  - symbol: 3
+    text: Field AI
+    # url: https://www.fieldai.com/
+links:
+  - name: Paper
+    url: USF.pdf
+    icon: ri:file-pdf-2-line
+  - name: arXiv
+    url: https://arxiv.org/abs/2511.18174
+    icon: academicons:arxiv
+  - name: Code
+    url: https://github.com/Tom-Notch/USF
+    icon: ri:github-line
+conference: CVPR 2026
+
+description: "Unified Spherical Frontend: Learning Rotation-Equivariant Representations of Spherical Images from Any Camera"
+thumbnail: og-thumbnail.png
+---
+
+import Video from "./components/Video.astro";
+import HighlightedSection from "./components/HighlightedSection.astro";
+import SmallCaps from "./components/SmallCaps.astro";
+import Figure from "./components/Figure.astro";
+import Picture from "./components/Picture.astro";
+import ModelViewer from "./components/ModelViewer.astro"
+import TwoColumns from "./components/TwoColumns.astro";
+import YouTubeVideo from "./components/YouTubeVideo.astro";
+import Carousel from "./components/Carousel.astro";
+import CarouselSlide from "./components/CarouselSlide.astro";
+import Wide from "./components/Wide.astro";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/starwind/tabs";
+import { Comparison } from "./components/Comparison.tsx";
+import { InteractiveFramework } from "./components/InteractiveFramework.tsx";
+import { MotivationFigures } from "./components/MotivationFigures.tsx";
+import InlineSvg from "./components/InlineSvg.astro";
+import SubFigures from "./components/SubFigures.astro";
+import TableMNIST from "./components/TableMNIST.astro";
+import TableDetection from "./components/TableDetection.astro";
+import TableSegmentation from "./components/TableSegmentation.astro";
+import TableLensAdaptation from "./components/TableLensAdaptation.astro";
+
+import outside from "./assets/outside.mp4";
+import dogsDiffc from "./assets/dogs-diffc.png"
+import dogsTrue from "./assets/dogs-true.png"
+import dogsMsillm from "@/assets/dogs-msillm.jpg"
+
+{/* <Video src={outside} /> */}
+
+<HighlightedSection>
+
+## Abstract
+
+We present Unified Spherical Frontend (USF), a distortion-free lens-agnostic framework that transforms images from any calibrated camera onto the unit sphere via ray-direction correspondences, and performs spherical resampling, convolution, and pooling canonically in the spatial domain.
+USF is modular: projection, location sampling, value interpolation, and resolution control are fully decoupled.
+Its configurable distance-only convolution kernels offer rotation-equivariance while avoiding harmonic transforms entirely.
+USF scales efficiently to high-resolution spherical imagery and maintains *less than 1%* performance drop under random test-time rotations without training-time rotational augmentation, and enables *zero-shot* generalization to any unseen (wide-FoV) lenses with minimal performance degradation.
+
+</HighlightedSection>
+
+## Motivation
+
+Most vision pipelines apply planar CNNs that assume a pinhole camera and operate on regular 2D grids. Each camera type (pinhole, fisheye, panoramic) has a unique projection geometry, forcing practitioners to train **separate, lens-specific models** that inevitably overfit onto the distortion patterns they see. This is **mathematically unavoidable**: by Gauss's *Theorema Egregium*, no flat projection preserves the intrinsic curvature of the sphere, so any 2D representation inevitably distorts geometry.
+
+<MotivationFigures client:idle />
+
+A model is **rotation-equivariant** if rotating its input produces an equivalently rotated output. This is a desirable property for any system where camera orientation may vary at test time. USF achieves both lens-agnostic processing and rotation-equivariance while supporting **plug-and-play** replacement of planar layers in any existing backbone, providing a generic framework for modern vision.
+
+<HighlightedSection>
+
+## Methodology
+
+<InteractiveFramework client:idle />
+
+</HighlightedSection>
+
+## Results
+
+We replace standard planar layers with spherical counterparts while keeping all other aspects of the models and training protocol **identical**. All evaluation is performed in the **planar domain** for consistency. **NR** and **RR** denote non-rotated and randomly rotated settings. Prior spectral-domain spherical CNNs are compared only in the low-resolution MNIST experiment due to their prohibitive cost at higher resolutions.
+
+### Rotation Equivariance
+
+<Tabs defaultValue="mnist">
+  <TabsList>
+    <TabsTrigger value="mnist">MNIST Classification</TabsTrigger>
+    <TabsTrigger value="detection">Object Detection</TabsTrigger>
+    <TabsTrigger value="segmentation">Semantic Segmentation</TabsTrigger>
+  </TabsList>
+  <TabsContent value="mnist"><TableMNIST /></TabsContent>
+  <TabsContent value="detection"><TableDetection /></TabsContent>
+  <TabsContent value="segmentation"><TableSegmentation /></TabsContent>
+</Tabs>
+
+Across all tasks, **distance-only** spherical kernels maintain strong performance under arbitrary rotations *without augmentation*, while planar models degrade sharply. The distance × direction kernel captures orientation-sensitive cues but sacrifices equivariance. Expressivity depends heavily on kernel parameterization: a low-level MLP underperforms a simple piecewise-constant design, highlighting the importance of appropriate embeddings.
+
+### Zero-Shot Lens Generalization
+
+We evaluate cross-lens adaptability by training on **one** lens type and testing on **all three**. Pinhole (90° FoV, 280×280), fisheye (180° FoV, 560×560), and panoramic lenses are simulated from equirectangular images with matched pixel-to-FoV ratios.
+
+<TableLensAdaptation />
+
+Planar models show clear performance drops when evaluated on a different lens from training. Spherical models transfer **more consistently** across lenses, especially when source and target share similar FoV coverage. Degradation is more noticeable between views with drastically different FoV (e.g., pinhole to panoramic) due to mismatched spatial coverage.
+
+## Computation Benchmark
+
+All benchmarks use a 960×480 panorama input with batch size 8, RGB channels, averaged over 10 runs on an NVIDIA H200 GPU (PyTorch 2.8.0, CUDA 12.8, float32).
+
+<Tabs defaultValue="layer">
+  <TabsList>
+    <TabsTrigger value="sampling">Sampling and Interpolation</TabsTrigger>
+    <TabsTrigger value="layer">Convolution and Pooling</TabsTrigger>
+    <TabsTrigger value="network">Network Backbone</TabsTrigger>
+  </TabsList>
+  <TabsContent value="sampling">
+<InlineSvg src="sampling_benchmark.svg" alt="Location Sampling and Value Interpolation benchmark" class="md:mx-auto md:max-w-[70%]" />
+
+<p class="text-center text-sm text-zinc-500 dark:text-zinc-400">Cold-start cost is dominated by geometric preprocessing (neighborhood construction, interpolation weights). Once cached, runtime drops to the <strong>millisecond level</strong> across all sampling methods.</p>
+  </TabsContent>
+  <TabsContent value="layer">
+<InlineSvg src="single_layer_benchmark.svg" alt="Spherical Convolution and Pooling benchmark" class="md:mx-auto md:max-w-[70%]" />
+
+<p class="text-center text-sm text-zinc-500 dark:text-zinc-400">Three spherical convolution variants compared against planar Conv2d (5×5 kernel, matching the ~25–30 neighbor receptive field). <strong>Discrete PWC sparse</strong> achieves the fastest sustained runtime; the continuous MLP variant benefits most from weight caching at inference.</p>
+  </TabsContent>
+  <TabsContent value="network">
+<InlineSvg src="network_benchmark.svg" alt="Network Backbone benchmark" class="md:mx-auto md:max-w-[70%]" />
+
+<p class="text-center text-sm text-zinc-500 dark:text-zinc-400">Planar and spherical versions of YOLOv11, DeepLab v3, and UNet with identical macro-architectures. Spherical networks often require <strong>fewer FLOPs</strong> but take longer in wall-clock time, since planar operators use heavily optimized CUDA kernels.</p>
+  </TabsContent>
+</Tabs>
+
+**Geometry caching is the key enabler**: once neighborhood structures and interpolation weights are precomputed, sustained runtime drops by **orders of magnitude**. Without caching, geometric preprocessing would dominate and make spherical pipelines infeasible at scale. With caching, spherical networks train at roughly **2×** the wall-clock time of planar counterparts, which we consider acceptable given the added geometric consistency, rotation equivariance, and lens-agnostic processing.
+
+## Citation
+
+<Tabs defaultValue="proceedings">
+  <TabsList>
+    <TabsTrigger value="proceedings">Proceedings</TabsTrigger>
+    <TabsTrigger value="arxiv">arXiv</TabsTrigger>
+  </TabsList>
+  <TabsContent value="proceedings">
+```bibtex
+@inproceedings{yu2026usf,
+	title        = {{Unified} {Spherical} {Frontend}: {Learning} {Rotation}-{Equivariant} {Representations} of {Spherical} {Images} from {Any} {Camera}},
+	author       = {Yu, Mukai and Dabhi, Mosam and Xie, Liuyue and Scherer, Sebastian and Jeni, László A.},
+	year         = {2026},
+	month        = jun,
+	booktitle    = {{IEEE}/{CVF} {Conference} on {Computer} {Vision} and {Pattern} {Recognition} ({CVPR})},
+  publisher    = {IEEE}
+}
+```
+  </TabsContent>
+  <TabsContent value="arxiv">
+```bibtex
+@misc{yu2025usf,
+	title         = {{Unified} {Spherical} {Frontend}: {Learning} {Rotation}-{Equivariant} {Representations} of {Spherical} {Images} from {Any} {Camera}},
+	author        = {Yu, Mukai and Dabhi, Mosam and Xie, Liuyue and Scherer, Sebastian and Jeni, László A.},
+	year          = {2025},
+	month         = nov,
+	publisher     = {arXiv},
+	doi           = {10.48550/arXiv.2511.18174},
+	url           = {https://arxiv.org/abs/2511.18174},
+	eprint        = {2511.18174},
+	archiveprefix = {arXiv},
+	primaryclass  = {cs.CV},
+	abstract      = {Modern perception increasingly relies on fisheye, panoramic, and other wide field-of-view (FoV) cameras, yet most pipelines still apply planar CNNs designed for pinhole imagery on 2D grids, where pixel-space neighborhoods misrepresent physical adjacency and models are sensitive to global rotations. Traditional spherical CNNs partially address this mismatch but require costly spherical harmonic transform that constrains resolution and efficiency. We present Unified Spherical Frontend (USF), a distortion-free lens-agnostic framework that transforms images from any calibrated camera onto the unit sphere via ray-direction correspondences, and performs spherical resampling, convolution, and pooling canonically in the spatial domain. USF is modular: projection, location sampling, value interpolation, and resolution control are fully decoupled. Its configurable distance-only convolution kernels offer rotation-equivariance, mirroring translation-equivariance in planar CNNs while avoiding harmonic transforms entirely. We compare multiple standard planar backbones with their spherical counterparts across classification, detection, and segmentation tasks on synthetic (Spherical MNIST) and real-world (PANDORA, Stanford 2D-3D-S) datasets, and stress-test robustness to extreme lens distortions, varying FoV, and arbitrary rotations. USF scales efficiently to high-resolution spherical imagery and maintains less than 1\% performance drop under random test-time rotations without training-time rotational augmentation, and enables zero-shot generalization to any unseen (wide-FoV) lenses with minimal performance degradation.}
+}
+```
+  </TabsContent>
+</Tabs>
+
+{/*
+
+## Reference
+
+[^ref]
+
+*/}

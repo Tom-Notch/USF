@@ -1,0 +1,134 @@
+<div class="not-prose overflow-x-auto">
+  <table class="mx-auto w-auto border-collapse text-sm">
+    <thead>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <th class="px-3 py-2 text-left align-middle font-semibold" rowspan="2"
+          >Model</th
+        >
+        <th class="px-3 py-2 text-center align-middle font-semibold" rowspan="2"
+          >Train</th
+        >
+        <th class="px-3 py-2 text-center font-semibold" colspan="2">Test NR</th>
+        <th class="px-3 py-2 text-center font-semibold" colspan="2">Test RR</th>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <th class="px-3 py-1 text-center text-xs">mIoU ↑</th>
+        <th class="px-3 py-1 text-center text-xs">mAcc ↑</th>
+        <th class="px-3 py-1 text-center text-xs">mIoU ↑</th>
+        <th class="px-3 py-1 text-center text-xs">mAcc ↑</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Planar DeepLab v3</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">35.01%</td>
+        <td class="px-3 py-1.5 text-center">58.30%</td>
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >12.11%</td
+        >
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >22.50%</td
+        >
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">32.29%</td>
+        <td class="px-3 py-1.5 text-center">52.89%</td>
+        <td class="px-3 py-1.5 text-center">38.30%</td>
+        <td class="px-3 py-1.5 text-center">53.99%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Planar UNet</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">33.33%</td>
+        <td class="px-3 py-1.5 text-center">55.48%</td>
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >12.91%</td
+        >
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >23.40%</td
+        >
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">33.75%</td>
+        <td class="px-3 py-1.5 text-center">51.13%</td>
+        <td class="px-3 py-1.5 text-center">35.91%</td>
+        <td class="px-3 py-1.5 text-center">51.52%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Planar YOLOv11</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">28.32%</td>
+        <td class="px-3 py-1.5 text-center">48.09%</td>
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >8.17%</td
+        >
+        <td class="bg-red-100 px-3 py-1.5 text-center dark:bg-red-900/40"
+          >16.43%</td
+        >
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">28.53%</td>
+        <td class="px-3 py-1.5 text-center">44.39%</td>
+        <td class="px-3 py-1.5 text-center">30.62%</td>
+        <td class="px-3 py-1.5 text-center">45.13%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2"
+          >Spherical DeepLab v3</td
+        >
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">28.78%</td>
+        <td class="px-3 py-1.5 text-center">45.27%</td>
+        <td class="px-3 py-1.5 text-center">28.09%</td>
+        <td class="px-3 py-1.5 text-center">41.18%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">30.55%</td>
+        <td class="px-3 py-1.5 text-center">44.58%</td>
+        <td class="px-3 py-1.5 text-center">32.59%</td>
+        <td class="px-3 py-1.5 text-center">45.38%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Spherical UNet</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">25.72%</td>
+        <td class="px-3 py-1.5 text-center">42.20%</td>
+        <td class="px-3 py-1.5 text-center">22.99%</td>
+        <td class="px-3 py-1.5 text-center">35.29%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">25.07%</td>
+        <td class="px-3 py-1.5 text-center">40.85%</td>
+        <td class="px-3 py-1.5 text-center">27.83%</td>
+        <td class="px-3 py-1.5 text-center">41.81%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-3 py-1.5 align-middle" rowspan="2">Spherical YOLOv11</td>
+        <td class="px-3 py-1.5 text-center">NR</td>
+        <td class="px-3 py-1.5 text-center">24.29%</td>
+        <td class="px-3 py-1.5 text-center">40.59%</td>
+        <td class="px-3 py-1.5 text-center">15.61%</td>
+        <td class="px-3 py-1.5 text-center">28.08%</td>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-3 py-1.5 text-center">RR</td>
+        <td class="px-3 py-1.5 text-center">21.52%</td>
+        <td class="px-3 py-1.5 text-center">38.88%</td>
+        <td class="px-3 py-1.5 text-center">24.05%</td>
+        <td class="px-3 py-1.5 text-center">38.98%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="h-4"></div>
+<p class="text-center text-base text-zinc-500 dark:text-zinc-400">
+  <strong>Semantic Segmentation on Stanford 2D-3D-S.</strong> Three backbones (DeepLab
+  v3, UNet, YOLOv11) with identical <strong>distance-only</strong> 3-segment PWC kernels.
+  RGB-only input, 3-fold cross-validation.
+</p>

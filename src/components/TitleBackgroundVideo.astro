@@ -1,0 +1,142 @@
+---
+interface Props {
+  lightMp4: string;
+  lightWebm: string;
+  darkMp4: string;
+  darkWebm: string;
+  lightPosterUrl?: string;
+  darkPosterUrl?: string;
+}
+
+const {
+  lightMp4,
+  lightWebm,
+  darkMp4,
+  darkWebm,
+  lightPosterUrl,
+  darkPosterUrl,
+} = Astro.props;
+---
+
+<div
+  class="pointer-events-none absolute inset-0 z-0 motion-reduce:hidden"
+  aria-hidden="true"
+>
+  <div
+    class="title-bg-slot absolute inset-0 flex justify-center overflow-x-hidden dark:hidden"
+  >
+    <video
+      class="h-full w-auto max-w-none shrink-0 bg-transparent object-contain"
+      data-title-bg-video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      poster={lightPosterUrl}
+      disablepictureinpicture
+    >
+      <source src={lightWebm} type="video/webm" />
+      <source src={lightMp4} type="video/mp4" />
+    </video>
+  </div>
+  <div
+    class="title-bg-slot absolute inset-0 hidden justify-center overflow-x-hidden dark:flex"
+  >
+    <video
+      class="h-full w-auto max-w-none shrink-0 bg-transparent object-contain"
+      data-title-bg-video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      poster={darkPosterUrl}
+      disablepictureinpicture
+    >
+      <source src={darkWebm} type="video/webm" />
+      <source src={darkMp4} type="video/mp4" />
+    </video>
+  </div>
+</div>
+
+{
+  (lightPosterUrl || darkPosterUrl) && (
+    <div
+      class="pointer-events-none absolute inset-0 z-0 hidden motion-reduce:block"
+      aria-hidden="true"
+    >
+      {lightPosterUrl && (
+        <div class="absolute inset-0 flex justify-center overflow-x-hidden dark:hidden">
+          <img
+            src={lightPosterUrl}
+            alt=""
+            class="h-full w-auto max-w-none shrink-0 bg-transparent object-contain"
+            decoding="async"
+          />
+        </div>
+      )}
+      {darkPosterUrl && (
+        <div class="absolute inset-0 hidden justify-center overflow-x-hidden dark:flex">
+          <img
+            src={darkPosterUrl}
+            alt=""
+            class="h-full w-auto max-w-none shrink-0 bg-transparent object-contain"
+            decoding="async"
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+<script is:inline>
+  (function () {
+    if (typeof document === "undefined") return;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    function slotVisible(slot) {
+      return (
+        slot instanceof HTMLElement && getComputedStyle(slot).display !== "none"
+      );
+    }
+    function syncPlayback() {
+      document.querySelectorAll("video[data-title-bg-video]").forEach((v) => {
+        if (!(v instanceof HTMLVideoElement)) return;
+        if (prefersReducedMotion.matches) {
+          v.pause();
+          v.removeAttribute("autoplay");
+          v.currentTime = 0;
+          return;
+        }
+        const slot = v.closest(".title-bg-slot");
+        if (!slotVisible(slot)) {
+          v.pause();
+          return;
+        }
+        v.play().catch(() => {});
+      });
+    }
+    document.querySelectorAll("video[data-title-bg-video]").forEach((v) => {
+      if (!(v instanceof HTMLVideoElement)) return;
+      v.addEventListener("loadeddata", () => {
+        if (prefersReducedMotion.matches) return;
+        if (slotVisible(v.closest(".title-bg-slot"))) v.play().catch(() => {});
+      });
+    });
+    syncPlayback();
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        document.querySelectorAll("video[data-title-bg-video]").forEach((x) => {
+          if (x instanceof HTMLVideoElement) x.pause();
+        });
+      } else syncPlayback();
+    });
+    prefersReducedMotion.addEventListener("change", syncPlayback);
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", syncPlayback);
+    document.addEventListener("usf-theme-change", syncPlayback);
+  })();
+</script>

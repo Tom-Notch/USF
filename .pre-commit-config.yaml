@@ -1,0 +1,101 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Don't run pre-commit on files under any thirdparty/, third_party/, third-party/, etc. sub-folders
+# But will run on directories like third/.../../party/, etc.
+exclude: (?i)^(.*third[^/]*party/.*|.*\.trt)$
+
+repos:
+  - repo: https://github.com/sirosen/check-jsonschema # check-jsonschema is a github actions and workflows verifier.
+    rev: 0.37.1
+    hooks:
+      - id: check-github-actions
+      - id: check-github-workflows
+
+  # Uses repo-root Prettier (prettier-plugin-astro, tailwind) + ESLint + Astro.
+  # Requires `npm ci` first — see .github/workflows/pre-commit.yml.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        language: system
+        entry: npm exec -- prettier --write --
+        files: (^prettier\.config\.ts$)|(.*\.(astro|css|scss|json|[jt]sx?|mjs|cjs|mdx|html))$
+        exclude: (?i)^(dist/.*|\.astro/.*|.*main.*scss)$
+      - id: eslint
+        name: eslint
+        language: system
+        entry: npm exec -- eslint --fix --max-warnings 0 --
+        files: (^eslint\.config\.ts$)|(.*\.(astro|tsx?|jsx?|mjs|cjs|json|md|mts|cts))$
+        exclude: (?i)^(dist/.*|\.astro/.*|package-lock\.json)$
+      - id: astro-check
+        name: astro check
+        language: system
+        entry: npm run check
+        pass_filenames: false
+
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+        - id: yamlfmt
+          exclude: (?i)(.pre-commit-config.yaml)$
+
+  - repo: https://github.com/jonasbb/pre-commit-latex-hooks
+    rev: v1.5.0
+    hooks:
+      - id: american-eg-ie
+      - id: cleveref-capitalization
+      - id: consistent-spelling
+        args:
+          [
+            "--emph=et al.",
+            "--emph=a priori",
+            "--emph=a posteriori",
+            '--regex=naive=\bna(i|\\"i)ve',
+          ]
+      - id: csquotes
+      - id: ensure-labels-for-sections
+        args:
+            [
+              # If present only check that there is a \label{} but not the value
+              "--ignore-label-content",
+            ]
+      - id: no-space-in-cite
+      - id: tilde-cite
+      - id: unique-labels
+        # args:
+        #     [
+        #       # If present only check for uniqueness within each file.
+        #       # Can be useful if a repository contains multiple main files.
+        #       "--individual",
+        #     ]
+      - id: cleveref-instead-of-autoref
+
+  - repo: https://github.com/cmhughes/latexindent.pl.git
+    rev: V4.0
+    hooks:
+      - id: latexindent
+
+  - repo: https://github.com/executablebooks/mdformat # mdformat is a markdown formatter.
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks # pre-commit-hooks is a collection of additional pre-commit hooks.
+    rev: v6.0.0
+    hooks:
+      # - id: requirements-txt-fixer # fixes requirements.txt and requirements-dev.txt.
+      # - id: check-added-large-files # prevents giant files from being committed.
+      - id: check-case-conflict # checks for files that would conflict in case-insensitive filesystem.
+      - id: check-merge-conflict # checks for files that contain merge conflict strings.
+      - id: check-yaml # checks yaml files for parseable syntax.
+        args:
+          - --allow-multiple-documents
+          - --unsafe
+      # - id: check-executables-have-shebangs # ensures that (non-binary) executables have a shebang.
+      # - id: check-shebang-scripts-are-executable # ensures that (non-binary) files with a shebang are executable.
+      - id: end-of-file-fixer # ensures that a file is either empty, or ends with one newline.
+      - id: fix-byte-order-marker # removes utf-8 byte order marker.
+      - id: mixed-line-ending # replaces or checks mixed line ending.
+      - id: trailing-whitespace # trims trailing whitespace.

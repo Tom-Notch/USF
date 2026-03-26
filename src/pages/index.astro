@@ -1,0 +1,182 @@
+---
+import { Font, Image } from "astro:assets";
+import faviconImg from "../assets/favicon.png";
+import cvprImg from "../assets/CVPR_2026.png";
+
+import TitleBackgroundVideo from "../components/TitleBackgroundVideo.astro";
+import FloatingPageControls from "../components/FloatingPageControls.astro";
+import Links from "../components/Links.astro";
+import Authors from "../components/Authors.astro";
+import Notes from "../components/Notes.astro";
+import type { Author, Note, Link } from "../types/types";
+
+import Table from "../components/Table.astro";
+
+import "../styles/global.css";
+import "katex/dist/katex-swap.css";
+
+import { Content, frontmatter } from "../paper.mdx";
+
+interface Frontmatter {
+  title: string;
+  authors: Author[];
+  conference?: string;
+  notes?: Note[];
+  links?: Link[];
+  description?: string;
+  favicon: string;
+  thumbnail?: string;
+  theme?: "device" | "light" | "dark";
+}
+
+const {
+  title,
+  authors,
+  conference,
+  notes,
+  links,
+  description,
+  thumbnail,
+  theme = "device",
+} = frontmatter as Frontmatter;
+
+const baseUrl = import.meta.env.BASE_URL;
+const prefix = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+const titleParts = title.split(/:\s*/);
+const titleMain = titleParts[0];
+const titleSub = titleParts.length > 1 ? titleParts.slice(1).join(": ") : null;
+---
+
+<!doctype html>
+<html class="m-0 bg-white p-0 dark:bg-black" lang="en" data-theme={theme}>
+  <head>
+    <meta charset="UTF-8" />
+    {description && <meta name="description" content={description} />}
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="icon" type="image/png" href={faviconImg.src} />
+
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content="website" />
+    {thumbnail && <meta property="og:image" content={prefix + thumbnail} />}
+
+    <Font
+      cssVariable="--font-noto-sans"
+      preload={[{ subset: "latin", style: "normal" }]}
+    />
+
+    <title>{title}</title>
+    <script is:inline>
+      (function () {
+        try {
+          var s = localStorage.getItem("usf-color-scheme");
+          if (s === "light" || s === "dark")
+            document.documentElement.setAttribute("data-theme", s);
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body class="m-0 max-w-none pt-0 pb-6 font-(family-name:--font-noto-sans)">
+    <FloatingPageControls />
+    <header
+      data-og-thumbnail
+      class="relative isolate mb-0 w-full overflow-hidden bg-white text-center dark:bg-black"
+    >
+      <TitleBackgroundVideo
+        lightMp4={`${prefix}HeadlineAnimationLight.mp4`}
+        lightWebm={`${prefix}HeadlineAnimationLight.webm`}
+        darkMp4={`${prefix}HeadlineAnimationDark.mp4`}
+        darkWebm={`${prefix}HeadlineAnimationDark.webm`}
+        lightPosterUrl={`${prefix}HeadlineAnimationLight-poster.webp`}
+        darkPosterUrl={`${prefix}HeadlineAnimationDark-poster.webp`}
+      />
+      <div
+        class="relative z-10 mx-auto max-w-[70rem] px-6 pt-12 pb-12 md:pt-16 md:pb-16"
+      >
+        <div class="hero-foreground w-full">
+          <h1
+            class="mx-auto mt-0 max-w-[65rem] px-1 text-3xl leading-snug font-normal text-zinc-900 md:text-5xl dark:text-zinc-100"
+          >
+            <Image
+              src={faviconImg}
+              alt=""
+              loading="eager"
+              class="not-prose mr-3 inline-block h-[1.3em] w-[1.3em] -translate-y-[0.08em] align-middle"
+            /><span class="font-bold">{titleMain}</span>{
+              titleSub && <>: {titleSub}</>
+            }
+          </h1>
+          <div class="mt-8 flex flex-col items-center gap-6 md:gap-7">
+            <Authors authors={authors} />
+            {notes && <Notes notes={notes} />}
+            {
+              conference && (
+                <div class="flex items-center justify-center gap-5 md:gap-6">
+                  <a
+                    href="https://cvpr.thecvf.com/Conferences/2026"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Image
+                      src={cvprImg}
+                      alt="CVPR 2026"
+                      loading="eager"
+                      class="h-12 w-auto md:h-16"
+                    />
+                  </a>
+                  <a
+                    href="https://theairlab.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={`${prefix}AirLab-Stacked.svg`}
+                      alt="AirLab"
+                      class="h-12 w-auto md:h-16"
+                    />
+                  </a>
+                </div>
+              )
+            }
+            {links && <Links links={links} />}
+          </div>
+        </div>
+      </div>
+    </header>
+    <main
+      class="prose prose-lg prose-zinc dark:prose-invert prose-a:text-blue-500 prose-a:dark:text-blue-300 prose-a:no-underline prose-a:hover:underline prose-a:font-normal prose-code:bg-zinc-200 prose-code:dark:bg-zinc-800 prose-code:text-zinc-800 prose-code:dark:text-zinc-200 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-medium prose-code:before:content-none prose-code:after:content-none max-w-none"
+    >
+      <Content components={{ table: Table }} />
+    </main>
+    <footer
+      class="mx-auto max-w-[60rem] px-6 text-center text-sm text-zinc-600 dark:text-zinc-400"
+    >
+      <p class="my-0">
+        Heavily modified from
+        <a
+          class="text-blue-500 no-underline hover:underline dark:text-blue-300"
+          href="https://research-template.roman.technology"
+          target="_blank"
+          rel="nofollow noopener noreferrer"
+          >Roman Hauksson-Neill's project page template</a
+        >
+      </p>
+    </footer>
+    <script>
+      document.querySelectorAll("a[href]").forEach((a) => {
+        if (
+          !a.getAttribute("target") &&
+          a.getAttribute("href")?.startsWith("http")
+        ) {
+          a.setAttribute("target", "_blank");
+          a.setAttribute(
+            "rel",
+            (a.getAttribute("rel") ?? "") + " noopener noreferrer",
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

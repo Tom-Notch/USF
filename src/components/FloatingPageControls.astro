@@ -1,0 +1,171 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<div
+  class="pointer-events-none fixed inset-x-0 top-0 z-[200] flex justify-end p-3 sm:p-4 md:p-5"
+>
+  <div class="pointer-events-auto">
+    <button
+      type="button"
+      id="usf-theme-toggle"
+      class="flex size-11 items-center justify-center rounded-full border border-zinc-400/35 bg-white/55 text-zinc-800 shadow-sm backdrop-blur-md transition hover:bg-white/75 dark:border-zinc-500/40 dark:bg-zinc-950/55 dark:text-zinc-100 dark:hover:bg-zinc-950/75"
+      aria-label="Switch color theme"
+    >
+      <Icon
+        name="ri:moon-line"
+        is:inline
+        class="size-[1.35rem] dark:hidden"
+        aria-hidden="true"
+      />
+      <Icon
+        name="ri:sun-line"
+        is:inline
+        class="hidden size-[1.35rem] dark:inline"
+        aria-hidden="true"
+      />
+    </button>
+  </div>
+</div>
+
+<button
+  type="button"
+  id="usf-back-to-top"
+  class="pointer-events-none invisible fixed right-3 bottom-4 z-[200] flex size-11 translate-y-6 items-center justify-center rounded-full border border-zinc-400/35 bg-white/55 text-zinc-800 opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 ease-out hover:bg-white/75 sm:right-4 sm:bottom-5 md:right-5 dark:border-zinc-500/40 dark:bg-zinc-950/55 dark:text-zinc-100 dark:hover:bg-zinc-950/75"
+  aria-label="Back to top"
+  tabindex="-1"
+>
+  <Icon
+    name="ri:arrow-up-line"
+    is:inline
+    class="size-[1.35rem]"
+    aria-hidden="true"
+  />
+</button>
+
+<script is:inline>
+  (function () {
+    var doc = document.documentElement;
+    var STORAGE = "usf-color-scheme";
+
+    function effectiveDark() {
+      var t = doc.getAttribute("data-theme");
+      if (t === "dark") return true;
+      if (t === "light") return false;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    function announceTheme() {
+      var dark = effectiveDark();
+      var btn = document.getElementById("usf-theme-toggle");
+      if (btn)
+        btn.setAttribute(
+          "aria-label",
+          dark ? "Switch to light mode" : "Switch to dark mode",
+        );
+    }
+
+    function emitThemeChange() {
+      document.dispatchEvent(new Event("usf-theme-change"));
+    }
+
+    function prefersReducedMotion() {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function applyThemeChoice(next) {
+      doc.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem(STORAGE, next);
+      } catch (_) {}
+      announceTheme();
+      emitThemeChange();
+    }
+
+    /** Animates theme change (View Transitions API or short CSS color sweep). */
+    function runThemedUpdate(next) {
+      if (!prefersReducedMotion() && document.startViewTransition) {
+        document.startViewTransition(function () {
+          applyThemeChoice(next);
+        });
+        return;
+      }
+      if (!prefersReducedMotion()) {
+        doc.classList.add("usf-theme-transition-colors");
+        applyThemeChoice(next);
+        window.setTimeout(function () {
+          doc.classList.remove("usf-theme-transition-colors");
+        }, 400);
+        return;
+      }
+      applyThemeChoice(next);
+    }
+
+    function initThemeToggle() {
+      var btn = document.getElementById("usf-theme-toggle");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var next = effectiveDark() ? "light" : "dark";
+        runThemedUpdate(next);
+      });
+      announceTheme();
+    }
+
+    function initBackToTop() {
+      var el = document.getElementById("usf-back-to-top");
+      if (!el) return;
+      var threshold = 240;
+      function onScroll() {
+        var y = window.scrollY || document.documentElement.scrollTop;
+        if (y > threshold) {
+          el.classList.remove(
+            "invisible",
+            "pointer-events-none",
+            "translate-y-6",
+            "opacity-0",
+          );
+          el.classList.add(
+            "pointer-events-auto",
+            "translate-y-0",
+            "opacity-100",
+          );
+          el.setAttribute("tabindex", "0");
+        } else {
+          el.classList.add(
+            "invisible",
+            "pointer-events-none",
+            "translate-y-6",
+            "opacity-0",
+          );
+          el.classList.remove(
+            "pointer-events-auto",
+            "translate-y-0",
+            "opacity-100",
+          );
+          el.setAttribute("tabindex", "-1");
+        }
+      }
+      el.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
+        initThemeToggle();
+        initBackToTop();
+      });
+    } else {
+      initThemeToggle();
+      initBackToTop();
+    }
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", function () {
+        if (doc.getAttribute("data-theme") === "device") announceTheme();
+      });
+  })();
+</script>

@@ -1,0 +1,27 @@
+---
+import { parseHTML } from "linkedom";
+
+const html = await Astro.slots.render("default");
+const { document } = parseHTML(html);
+const iframe = document.querySelector("iframe[title]");
+const img = document.querySelector("img[alt]");
+const ariaEl = document.querySelector("[aria-label]");
+const title =
+  iframe?.getAttribute("title") ??
+  img?.getAttribute("alt") ??
+  ariaEl?.getAttribute("aria-label") ??
+  "";
+---
+
+<div class="slide-viewport snap-start px-[calc(var(--slide-gap)/2)]">
+  <div class="slide w-[var(--actual-text-width)] **:my-0">
+    <Fragment set:html={html} />
+    {
+      title && (
+        <p class="pt-4 text-center text-xl text-zinc-500 dark:text-zinc-400">
+          {title}
+        </p>
+      )
+    }
+  </div>
+</div>

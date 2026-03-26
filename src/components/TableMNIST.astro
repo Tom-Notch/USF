@@ -1,0 +1,65 @@
+<div class="not-prose overflow-x-auto">
+  <table class="mx-auto w-auto border-collapse text-sm">
+    <thead>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <th class="px-4 py-2 text-left font-semibold">Model</th>
+        <th class="px-4 py-2 text-center font-semibold">NR ↑</th>
+        <th class="px-4 py-2 text-center font-semibold">RR ↑</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-4 py-1.5">&ensp;&ensp;&ensp;Planar</td>
+        <td class="px-4 py-1.5 text-center">98.45%</td>
+        <td class="bg-red-100 px-4 py-1.5 text-center dark:bg-red-900/40"
+          >41.08%</td
+        >
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-4 py-1.5">&ensp;&ensp;&ensp;S²CNN</td>
+        <td class="px-4 py-1.5 text-center">96%</td>
+        <td class="px-4 py-1.5 text-center">94%</td>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-4 py-1.5">&ensp;&ensp;&ensp;SO(3) CNN</td>
+        <td class="px-4 py-1.5 text-center">98.7%</td>
+        <td class="px-4 py-1.5 text-center">98.1%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-4 py-1.5">(1) Spherical Dis PWC ×3</td>
+        <td class="px-4 py-1.5 text-center">87.18%</td>
+        <td class="px-4 py-1.5 text-center">85.43%</td>
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-4 py-1.5">(2) Spherical Dis MLP [8,8], <i>L</i>=0</td>
+        <td class="bg-red-100 px-4 py-1.5 text-center dark:bg-red-900/40"
+          >67.01%</td
+        >
+        <td class="bg-red-100 px-4 py-1.5 text-center dark:bg-red-900/40"
+          >65.74%</td
+        >
+      </tr>
+      <tr class="border-b border-zinc-200 dark:border-zinc-700">
+        <td class="px-4 py-1.5">(3) Spherical Dis MLP [8,8], <i>L</i>=6</td>
+        <td class="px-4 py-1.5 text-center">92.13%</td>
+        <td class="px-4 py-1.5 text-center">91.50%</td>
+      </tr>
+      <tr class="border-b-2 border-zinc-300 dark:border-zinc-600">
+        <td class="px-4 py-1.5"
+          >(4) Spherical Dis×Dir MLP [16,16], <i>L</i>=8</td
+        >
+        <td class="px-4 py-1.5 text-center">98.28%</td>
+        <td class="bg-red-100 px-4 py-1.5 text-center dark:bg-red-900/40"
+          >43.54%</td
+        >
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="h-4"></div>
+<p class="text-center text-base text-zinc-500 dark:text-zinc-400">
+  <strong>Spherical MNIST Classification.</strong> All models trained <em
+    >without</em
+  > random rotation. <i>L</i> denotes Fourier embedding levels. Variants (1)–(3) are
+  <strong>distance-only</strong> (rotation-equivariant); (4) includes direction (gauge-dependent).
+</p>

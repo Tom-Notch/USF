@@ -1,0 +1,135 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+import { AdaptiveSvg } from "./AdaptiveSvg.tsx";
+
+interface Figure {
+  src: string;
+  caption: string;
+}
+
+interface Props {
+  figures: Figure[];
+}
+
+const { figures } = Astro.props;
+
+const processed = figures.map(({ src, caption }) => {
+  const filePath = path.resolve("public", src);
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const vbMatch = raw.match(/viewBox="([^"]+)"/);
+  const vbWidth = vbMatch ? parseFloat(vbMatch[1].split(/\s+/)[2]) : 1;
+  return { src, vbWidth, caption };
+});
+
+const gridCols = processed.map((p) => `${p.vbWidth}fr`).join(" ");
+---
+
+{/* Desktop: proportional grid */}
+<div
+  class="subfigures-desktop not-prose hidden items-end md:grid"
+  style={`--grid-cols: ${gridCols};`}
+>
+  {
+    processed.map(({ src, caption }) => (
+      <figure class="flex flex-col items-center">
+        <AdaptiveSvg client:load src={src} className="w-full h-auto" />
+        <figcaption class="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          {caption}
+        </figcaption>
+      </figure>
+    ))
+  }
+</div>
+
+{/* Mobile: carousel */}
+<div class="subfigures-mobile not-prose md:hidden">
+  <div
+    class="subfigures-carousel flex snap-x snap-mandatory items-end overflow-x-auto [scrollbar-width:none]"
+  >
+    {
+      processed.map(({ src, caption }, i) => (
+        <div class="w-full flex-shrink-0 snap-center px-4" data-index={i}>
+          <figure class="flex flex-col items-center">
+            <AdaptiveSvg client:load src={src} className="w-full h-auto" />
+            <figcaption class="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
+              {caption}
+            </figcaption>
+          </figure>
+        </div>
+      ))
+    }
+  </div>
+  <div class="mt-3 flex justify-center gap-2">
+    {
+      processed.map((_, i) => (
+        <button
+          type="button"
+          class="subfigures-dot h-2 w-2 rounded-full bg-zinc-300 transition dark:bg-zinc-600"
+          data-dot={i}
+          aria-label={`Go to slide ${i + 1}`}
+        />
+      ))
+    }
+  </div>
+</div>
+
+<style is:global>
+  @reference "../styles/global.css";
+
+  .subfigures-desktop {
+    grid-template-columns: var(--grid-cols);
+  }
+
+  .subfigures-dot.active {
+    @apply scale-[1.4] bg-orange-600 dark:bg-orange-300;
+  }
+</style>
+
+<script>
+  document
+    .querySelectorAll<HTMLDivElement>(".subfigures-mobile")
+    .forEach((wrapper) => {
+      const carousel = wrapper.querySelector<HTMLDivElement>(
+        ".subfigures-carousel",
+      );
+      const dots =
+        wrapper.querySelectorAll<HTMLButtonElement>(".subfigures-dot");
+      if (!carousel || dots.length === 0) return;
+
+      const slides = carousel.children;
+      let current = 0;
+
+      function update(index: number) {
+        current = index;
+        dots.forEach((d, i) => d.classList.toggle("active", i === index));
+      }
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => {
+          const slide = slides[i] as HTMLElement;
+          carousel.scrollTo({
+            left: slide.offsetLeft - carousel.offsetLeft,
+            behavior: "smooth",
+          });
+        });
+      });
+
+      update(0);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.filter((e) => e.isIntersecting);
+          if (visible.length === 0) return;
+          const best = visible.reduce((a, b) =>
+            b.intersectionRatio > a.intersectionRatio ? b : a,
+          );
+          const idx = Number((best.target as HTMLElement).dataset.index ?? 0);
+          if (idx !== current) update(idx);
+        },
+        { root: carousel, threshold: 0.5 },
+      );
+
+      Array.from(slides).forEach((s) => observer.observe(s));
+    });
+</script>
