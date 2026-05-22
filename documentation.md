@@ -44,21 +44,19 @@ For longer videos, you probably want to use a hosted video service, like YouTube
 
 [The original Nerfies project page](https://nerfies.github.io/) uses the Google Sans font, which is technically [licensed by Google and unavailable for public use](https://developers.google.com/fonts/faq#can_i_use_the_product_sans_or_google_sans_fonts). Instead, I choose to use [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans), which looks similar, supports a wide range of glyphs, and is a [variable font](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_fonts/Variable_fonts_guide) (so it loads faster).
 
-If you want to use a different font, consult the docs on [Astro's experimental Fonts API](https://docs.astro.build/en/reference/experimental-flags/fonts/). You'll have to edit the following lines. If you're using a [Google Font](https://fonts.google.com/), it's simple as editing the font name.
+If you want to use a different font, consult the docs on [Astro's Fonts API](https://docs.astro.build/en/guides/fonts/). You'll have to edit the following lines. If you're using a [Google Font](https://fonts.google.com/), it's simple as editing the font name.
 
 In [`/astro.config.ts`](./astro.config.ts):
 
 ```ts
-experimental: {
-  fonts: [
-    {
-      provider: fontProviders.google(),
-      name: "Noto Sans",
-      cssVariable: "--font-noto-sans",
-      weights: ["100 900"],
-    },
-  ];
-}
+fonts: [
+  {
+    provider: fontProviders.google(),
+    name: "Noto Sans",
+    cssVariable: "--font-noto-sans",
+    weights: ["100 900"],
+  },
+];
 ```
 
 In [`/src/pages/index.astro`](./src/pages/index.astro):

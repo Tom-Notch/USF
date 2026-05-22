@@ -45,7 +45,7 @@ const gridCols = processed.map((p) => `${p.vbWidth}fr`).join(" ");
 {/* Mobile: carousel */}
 <div class="subfigures-mobile not-prose md:hidden">
   <div
-    class="subfigures-carousel flex snap-x snap-mandatory items-end overflow-x-auto [scrollbar-width:none]"
+    class="subfigures-carousel flex snap-x snap-mandatory [scrollbar-width:none] items-end overflow-x-auto"
   >
     {
       processed.map(({ src, caption }, i) => (

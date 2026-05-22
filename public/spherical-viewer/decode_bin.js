@@ -159,7 +159,6 @@ export function decodeSphericalBin(buffer) {
   off += countP * esP;
 
   const maskFloat = toFloat32Array(buffer, off, n, dM);
-  off += n * esM;
   const mask = new Uint8Array(n);
   for (let i = 0; i < n; i++) {
     mask[i] = maskFloat[i] !== 0 ? 1 : 0;

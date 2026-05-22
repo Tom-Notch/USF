@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <base target="_blank" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 200px;
+        height: 220px;
+        overflow: hidden;
+        background: transparent;
+      }
+    </style>
+    <script>
+      (function () {
+        var noop = function () {};
+        window.onerror = function () {
+          return true;
+        };
+        window.onunhandledrejection = function (event) {
+          event.preventDefault();
+        };
+        if (window.console) {
+          window.console.warn = noop;
+          window.console.error = noop;
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="visitor_globe"></div>
+    <script>
+      (function () {
+        var origAppend = Node.prototype.appendChild;
+        var origInsert = Node.prototype.insertBefore;
+
+        function blockIframe(el) {
+          return el && el.tagName === "IFRAME";
+        }
+
+        Node.prototype.appendChild = function (child) {
+          if (blockIframe(child)) return child;
+          return origAppend.call(this, child);
+        };
+
+        Node.prototype.insertBefore = function (child, ref) {
+          if (blockIframe(child)) return child;
+          return origInsert.call(this, child, ref);
+        };
+
+        var script = document.createElement("script");
+        script.id = "mmvst_globe";
+        script.src =
+          "https://mapmyvisitors.com/globe.js?d=LID0oYYSmutyFLdphIiI4z8jAuqIpvQxIAcaMumfnlc&w=200";
+        document.getElementById("visitor_globe").appendChild(script);
+      })();
+    </script>
+  </body>
+</html>

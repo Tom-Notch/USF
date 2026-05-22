@@ -17,7 +17,7 @@ import { chromium } from "playwright";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const distDir = path.join(root, "dist");
-const astroCli = path.join(root, "node_modules", "astro", "astro.js");
+const astroCli = path.join(root, "node_modules", "astro", "bin", "astro.mjs");
 const port = process.env.OG_PREVIEW_PORT || "8791";
 const outFile = path.join(distDir, "og-thumbnail.png");
 /** 16:9 link-preview frame */
@@ -106,6 +106,7 @@ async function main() {
   const preview = spawn(
     process.execPath,
     [
+      "--disable-warning=DEP0040",
       astroCli,
       "preview",
       "--host",
@@ -146,7 +147,12 @@ async function main() {
       // no reducedMotion — keep hero video visible for a realistic frame
     });
     const page = await context.newPage();
-    await page.goto(url, { waitUntil: "networkidle", timeout: 120000 });
+    /**
+     * `networkidle` is unreliable here: the hero `<video>` autoplays + loops, and
+     * external trackers (visitor counter iframe) may keep the request set "pending".
+     * Use `load` and rely on the explicit waits below (fonts, hero element, video metadata).
+     */
+    await page.goto(url, { waitUntil: "load", timeout: 120000 });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.addStyleTag({
       content:

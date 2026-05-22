@@ -335,7 +335,7 @@ const sections: Section[] = [
     extra: (
       <div
         className="mt-4 [&_.katex-display]:!mx-0 [&_.katex-display]:!overflow-x-auto [&_.katex-display]:!overflow-y-hidden"
-        // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml -- trusted KaTeX output
+        // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- trusted KaTeX output
         dangerouslySetInnerHTML={{ __html: convolutionEquationHtml }}
       />
     ),
@@ -397,7 +397,7 @@ const sections: Section[] = [
     extra: (
       <div
         className="mt-4 [&_.katex-display]:!mx-0 [&_.katex-display]:!overflow-x-auto [&_.katex-display]:!overflow-y-hidden"
-        // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml -- trusted KaTeX output
+        // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- trusted KaTeX output
         dangerouslySetInnerHTML={{ __html: poolingEquationHtml }}
       />
     ),
@@ -509,8 +509,8 @@ function CardDeck({
   const animatingRef = useRef(false);
 
   useEffect(() => {
-    setFrontIndex(defaultCard); // eslint-disable-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect -- reset on section change
-    setAnim("none"); // eslint-disable-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    setFrontIndex(defaultCard); // eslint-disable-line @eslint-react/set-state-in-effect -- reset on section change
+    setAnim("none"); // eslint-disable-line @eslint-react/set-state-in-effect
   }, [sectionId, defaultCard]);
 
   if (cards.length === 0) return null;
@@ -850,14 +850,14 @@ export function InteractiveFramework() {
 
   useEffect(() => {
     if (activeSection) {
-      setDisplayedSection(activeSection); // eslint-disable-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect -- keep content during close animation
+      setDisplayedSection(activeSection); // eslint-disable-line @eslint-react/set-state-in-effect -- keep content during close animation
     }
   }, [activeSection]);
 
   useEffect(() => {
     const el = deckElRef.current;
     if (!el) {
-      setDeckHeight(0); // eslint-disable-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect -- sync with DOM measurement
+      setDeckHeight(0);
       return;
     }
     const ro = new ResizeObserver(() => {

@@ -15,6 +15,9 @@ import astroExpressiveCode from "astro-expressive-code";
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      chunkSizeWarningLimit: 1200,
+    },
     resolve: {
       dedupe: ["react", "react-dom"],
     },
@@ -56,16 +59,14 @@ export default defineConfig({
     mdx(),
     react(),
   ],
-  experimental: {
-    fonts: [
-      {
-        provider: fontProviders.google(),
-        name: "Noto Sans",
-        cssVariable: "--font-noto-sans",
-        weights: ["100 900"],
-      },
-    ],
-  },
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: "Noto Sans",
+      cssVariable: "--font-noto-sans",
+      weights: ["100 900"],
+    },
+  ],
   image: {
     responsiveStyles: true,
   },

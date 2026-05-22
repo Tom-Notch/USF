@@ -79,6 +79,32 @@ const titleSub = titleParts.length > 1 ? titleParts.slice(1).join(": ") : null;
     </script>
   </head>
   <body class="m-0 max-w-none pt-0 pb-6 font-(family-name:--font-noto-sans)">
+    <iframe
+      src={`${prefix}visitor-counter.html`}
+      title=""
+      aria-hidden="true"
+      tabindex="-1"
+      class="pointer-events-none absolute top-0 left-[-10000px] h-[220px] w-[200px] overflow-hidden border-0 opacity-0"
+    ></iframe>
+    <script is:inline>
+      (function () {
+        if (typeof fetch !== "function") return;
+
+        var params = new URLSearchParams({
+          id: "2241623",
+          last_hit_id: "0",
+          initial_hit_id: "0",
+          w: "200",
+          _: Date.now().toString(),
+        });
+
+        fetch("https://mapmyvisitors.com/ajax/globe?" + params, {
+          cache: "no-store",
+          credentials: "omit",
+          mode: "no-cors",
+        }).catch(function () {});
+      })();
+    </script>
     <FloatingPageControls />
     <header
       data-og-thumbnail
