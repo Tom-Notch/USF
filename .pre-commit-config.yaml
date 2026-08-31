@@ -8,7 +8,7 @@ exclude: (?i)^(.*third[^/]*party/.*|.*\.ts|.*\.trt)$
 
 repos:
     - repo: https://github.com/sirosen/check-jsonschema # check-jsonschema is a github actions and workflows verifier.
-      rev: 0.37.1
+      rev: 0.38.0
       hooks:
           - id: check-github-actions
           - id: check-github-workflows
@@ -20,7 +20,7 @@ repos:
             exclude: (?i)(.*docker-compose.*|environment.*|requirement.*)$ # by-pass some const files
 
     - repo: https://github.com/AleksaC/hadolint-py # hadolint is a Dockerfile linter.
-      rev: v2.14.0
+      rev: v2.15.1
       hooks:
           - id: hadolint
             args:
@@ -28,12 +28,12 @@ repos:
                 - error
 
     - repo: https://github.com/scop/pre-commit-shfmt # pre-commit-shfmt formats shell scripts.
-      rev: v3.13.0-1
+      rev: v3.13.1-1
       hooks:
           - id: shfmt
 
     - repo: https://github.com/shellcheck-py/shellcheck-py # shellcheck-py is a shellcheck wrapper.
-      rev: v0.11.0.1
+      rev: v0.11.0.1-1
       hooks:
           - id: shellcheck
             args:
@@ -41,24 +41,24 @@ repos:
                 - SC1071,SC1091,SC2016
 
     - repo: https://github.com/PyCQA/autoflake # remove unused imports and unused variables.
-      rev: v2.3.3
+      rev: v2.4.0
       hooks:
           - id: autoflake
             args: [--remove-all-unused-imports, --remove-unused-variables, --in-place]
 
     - repo: https://github.com/pycqa/isort
-      rev: 8.0.1
+      rev: 9.0.1
       hooks:
           - id: isort
             args: [--profile=black]
 
-    - repo: https://github.com/psf/black # The uncompromising Python code formatter.
-      rev: 26.3.1
+    - repo: https://github.com/psf/black-pre-commit-mirror # The uncompromising Python code formatter.
+      rev: 26.5.1
       hooks:
           - id: black
 
     - repo: https://github.com/jsh9/pydoclint # pydoclint checks that docstrings match function signatures.
-      rev: 0.8.3
+      rev: 0.9.1
       hooks:
           - id: pydoclint
             args:
@@ -90,7 +90,7 @@ repos:
           - id: nbqa-black
 
     - repo: https://github.com/pre-commit/mirrors-clang-format # mirrors-clang-format is a clang-format wrapper, it can format json.
-      rev: v22.1.2
+      rev: v23.1.0
       hooks:
           - id: clang-format
             files: (?i)\.(h|c|hpp|cpp|hxx|cxx|cc|json)$ # enabled json, if prettier is used, should turn off json.
